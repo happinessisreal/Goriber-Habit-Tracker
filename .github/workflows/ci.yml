@@ -1,0 +1,23 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+        cc: [gcc, clang]
+        exclude:
+          - os: macos-latest
+            cc: gcc   # gcc is an alias for clang on macOS runners
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build (warnings are errors)
+        run: make CC=${{ matrix.cc }} CFLAGS="-std=c11 -O2 -Wall -Wextra -Wpedantic -Wformat=2 -Werror"
+      - name: Smoke tests
+        run: make test
